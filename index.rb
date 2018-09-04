@@ -66,9 +66,9 @@ login_response = Net::HTTP.post_form(URI(url_login),data)
 
 url_ticket = JSON.parse(login_response.body)['crossDomainUrlList'][0]
 
-weibo_sso_res = open(url_ticket);
+weibo_sso_res = Net::HTTP.get_response(URI(url_ticket));
 
-p weibo_sso_res.meta['set-cookie']
+p weibo_sso_res.get_fields('set-cookie')
 
 
 # puts URI::encode('1290657123@qq.com')
