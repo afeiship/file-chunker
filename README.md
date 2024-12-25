@@ -16,6 +16,15 @@ npm install @jswork/file-chunker
 import FileChunk from '@jswork/file-chunker';
 
 const ipt1 = document.getElementById('file');
+const apiPut = ({ chunk }) => {
+  return fetch('https://httpbin.org/post', {
+    method: 'POST',
+    body: chunk,
+    headers: {
+      'Content-Type': 'application/octet-stream'
+    }
+  }).then(r => r.json());
+};
 
 ipt1.addEventListener('change', function(e) {
   const files = e.target.files;
@@ -26,15 +35,11 @@ ipt1.addEventListener('change', function(e) {
       concurrency: 3
     });
     console.log(chunker.chunkCount);
-    chunker.processChunks(({ chunk, index, current, count }) => {
-      console.log('chunk:', chunk, 'count:', count, 'percent: ', (current / count * 100).toFixed(2) + '%');
-      return fetch('https://httpbin.org/post', {
-        method: 'POST',
-        body: chunk,
-        headers: {
-          'Content-Type': 'application/octet-stream'
-        }
-      });
+    chunker.processChunks(({ chunk, current, count }) => {
+      console.log('chunk:', chunk, 'current:', current, 'count:', count, 'percent: ', (current / count * 100).toFixed(2) + '%');
+      return apiPut({ chunk });
+    }).then(res => {
+      console.log('res: ', res);
     });
   }
 });
