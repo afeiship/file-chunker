@@ -1,4 +1,4 @@
-export interface IFileChunkerOptions {
+export interface IFileChunkOptions {
   chunkSize: number;
   concurrency: number;
 }
@@ -9,7 +9,7 @@ export interface IFileChunk {
   total: number;
 }
 
-const defaultOptions: Partial<IFileChunkerOptions> = {
+const defaultOptions: Partial<IFileChunkOptions> = {
   chunkSize: 1024 * 1024, // 1MB
   concurrency: 10
 };
@@ -18,14 +18,14 @@ const defaultOptions: Partial<IFileChunkerOptions> = {
 
 class FileChunker {
   public file: Blob;
-  public options: IFileChunkerOptions;
+  public options: IFileChunkOptions;
 
   get chunkCount(): number {
     const { chunkSize } = this.options;
     return Math.ceil(this.file.size / chunkSize);
   }
 
-  constructor(inFile: Blob, inOptions: IFileChunkerOptions) {
+  constructor(inFile: Blob, inOptions: IFileChunkOptions) {
     this.file = inFile;
     this.options = { ...defaultOptions, ...inOptions };
   }
