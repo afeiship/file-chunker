@@ -6,7 +6,7 @@ export interface IFileChunkOptions {
 export interface IFileChunk {
   chunk: Blob;
   index: number;
-  total: number;
+  count: number;
 }
 
 const defaultOptions: Partial<IFileChunkOptions> = {
@@ -16,8 +16,8 @@ const defaultOptions: Partial<IFileChunkOptions> = {
 
 // @ref: https://chatgpt.com/c/676ace72-732c-8013-9342-48797a30f123
 
-class FileChunker {
-  public file: Blob;
+class FileChunk {
+  public file: File;
   public options: IFileChunkOptions;
 
   get chunkCount(): number {
@@ -25,7 +25,18 @@ class FileChunker {
     return Math.ceil(this.file.size / chunkSize);
   }
 
-  constructor(inFile: Blob, inOptions: IFileChunkOptions) {
+  get meta() {
+    const { file, options } = this;
+    return {
+      name: file.name,
+      size: file.size,
+      chunkSize: options.chunkSize,
+      chunkCount: this.chunkCount,
+      concurrency: options.concurrency
+    };
+  }
+
+  constructor(inFile: File, inOptions: IFileChunkOptions) {
     this.file = inFile;
     this.options = { ...defaultOptions, ...inOptions };
   }
@@ -53,18 +64,18 @@ class FileChunker {
     };
   }
 
-  async processFileChunks(processChunk: (fileChunk: IFileChunk) => Promise<any>): Promise<any[]> {
+  async processChunks(processChunk: (fileChunk: IFileChunk) => Promise<any>): Promise<any[]> {
     const { concurrency } = this.options;
     const chunkIterator = this.createIterator();
     // 将所有分片存储到数组中
     const chunks = [...chunkIterator];
 
     // 创建一个队列并行处理分片
-    const results: any[] = [];
+    const results: Promise<any>[] = [];
     let activeTasks: Promise<any>[] = [];
 
     for (const [index, chunk] of chunks.entries()) {
-      const task = processChunk({ chunk, index, total: this.chunkCount }); // 假设 processChunk 是异步的处理函数
+      const task = processChunk({ chunk, index, count: this.chunkCount }); // 假设 processChunk 是异步的处理函数
       activeTasks.push(task);
 
       // 控制并行任务数量
@@ -81,4 +92,4 @@ class FileChunker {
   }
 }
 
-export default FileChunker;
+export default FileChunk;

@@ -13,11 +13,31 @@ npm install @jswork/file-chunker
 
 ## usage
 ```js
-import fileChunker from '@jswork/file-chunker';
+import FileChunk from '@jswork/file-chunker';
 
-fileChunker(1024);
+const ipt1 = document.getElementById('file');
 
-// [1000, 0, 20, 4]
+ipt1.addEventListener('change', function(e) {
+  const files = e.target.files;
+  if (files.length) {
+    const file = files[0];
+    const chunker = new FileChunk(file, {
+      chunkSize: 1024 * 1024,
+      concurrency: 3
+    });
+    
+    chunker.processChunks(({ chunk, index, total }) => {
+      console.log('chunk:', chunk, indx, total);
+      return fetch('https://httpbin.org/post', {
+        method: 'POST',
+        body: chunk,
+        headers: {
+          'Content-Type': 'application/octet-stream'
+        }
+      });
+    });
+  }
+});
 ```
 
 ## license

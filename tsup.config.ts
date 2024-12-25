@@ -1,4 +1,5 @@
 import { defineConfig, Options } from 'tsup';
+// @ts-ignore
 import tsupBanner from '@jswork/tsup-banner';
 import { umdWrapper } from 'esbuild-plugin-umd-wrapper';
 import { replace } from 'esbuild-plugin-replace';
@@ -13,30 +14,30 @@ const baseOptions: Options = {
   cjsInterop: true,
   // external: ['react', 'react-dom'],
   banner: {
-    js: tsupBanner(),
+    js: tsupBanner()
   },
   outExtension({ format }) {
     return {
-      js: `.${format}.js`,
+      js: `.${format}.js`
     };
-  },
+  }
 };
 
 export default defineConfig([
   {
     ...baseOptions,
-    splitting: true,
+    splitting: true
   },
   {
     ...baseOptions,
     format: ['umd'] as any,
     esbuildPlugins: [
       replace({
-        'export default': 'export =',
+        'export default': 'export ='
       }),
       umdWrapper({
-        libraryName: 'fileChunker',
-      }),
-    ],
+        libraryName: 'FileChunk'
+      })
+    ]
   }
 ]);

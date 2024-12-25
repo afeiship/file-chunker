@@ -11,19 +11,19 @@
 <h1>Demo</h1>
 <input type="file" id="file">
 <script type="module">
-  import FileChunker from 'https://unpkg.com/@jswork/file-chunker@1.0.1/dist/index.esm.js';
+  import FileChunk from 'https://unpkg.com/@jswork/file-chunker@1.0.1/dist/index.esm.js';
 
   const ipt1 = document.getElementById('file');
   ipt1.addEventListener('change', function(e) {
     const files = e.target.files;
     if (files.length) {
       const file = files[0];
-      const chunker = new FileChunker(file, {
+      const chunker = new FileChunk(file, {
         chunkSize: 1024 * 1024,
         concurrency: 3
       });
       console.log(chunker.chunkCount);
-      chunker.processFileChunks((chunk) => {
+      chunker.processChunks((chunk) => {
         console.log('chunk:', chunk);
         return fetch('https://httpbin.org/post', {
           method: 'POST',
