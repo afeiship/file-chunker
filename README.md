@@ -25,9 +25,9 @@ ipt1.addEventListener('change', function(e) {
       chunkSize: 1024 * 1024,
       concurrency: 3
     });
-    
-    chunker.processChunks(({ chunk, index, total }) => {
-      console.log('chunk:', chunk, indx, total);
+    console.log(chunker.chunkCount);
+    chunker.processChunks(({ chunk, index, current, count }) => {
+      console.log('chunk:', chunk, 'count:', count, 'percent: ', (current / count * 100).toFixed(2) + '%');
       return fetch('https://httpbin.org/post', {
         method: 'POST',
         body: chunk,

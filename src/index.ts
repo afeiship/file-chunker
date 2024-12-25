@@ -5,7 +5,7 @@ export interface IFileChunkOptions {
 
 export interface IFileChunk {
   chunk: Blob;
-  index: number;
+  current: number;
   count: number;
 }
 
@@ -75,7 +75,8 @@ class FileChunk {
     let activeTasks: Promise<any>[] = [];
 
     for (const [index, chunk] of chunks.entries()) {
-      const task = processChunk({ chunk, index, count: this.chunkCount }); // 假设 processChunk 是异步的处理函数
+      const current = index + 1;
+      const task = processChunk({ chunk, current, count: this.chunkCount }); // 假设 processChunk 是异步的处理函数
       activeTasks.push(task);
 
       // 控制并行任务数量

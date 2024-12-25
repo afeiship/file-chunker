@@ -23,8 +23,8 @@
         concurrency: 3
       });
       console.log(chunker.chunkCount);
-      chunker.processChunks(({ chunk, index, count }) => {
-        console.log('chunk:', chunk, 'index:', index, 'count:', count);
+      chunker.processChunks(({ chunk, index, current, count }) => {
+        console.log('chunk:', chunk, 'count:', count, 'percent: ', (current / count * 100).toFixed(2) + '%');
         return fetch('https://httpbin.org/post', {
           method: 'POST',
           body: chunk,
