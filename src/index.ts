@@ -76,7 +76,6 @@ class FileChunk {
 
     for (const [index, chunk] of chunks.entries()) {
       const current = index + 1;
-      console.log('chunk current:', current);
       const task = processChunk({ chunk, current, count: this.chunkCount }).then((res) => {
         // remove the task from the active tasks list when it's done
         activeTasks.splice(activeTasks.indexOf(task), 1);
