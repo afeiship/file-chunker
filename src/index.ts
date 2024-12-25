@@ -72,27 +72,27 @@ class FileChunk {
 
     // 创建一个队列并行处理分片
     const results: Promise<any>[] = [];
-    let activeTasks: Promise<any>[] = [];
+    const activeTasks: Promise<any>[] = [];
 
     for (const [index, chunk] of chunks.entries()) {
       const current = index + 1;
-      const task = processChunk({ chunk, current, count: this.chunkCount }).then((result) => ({
-        result,
-        task
-      }));
+      const task = processChunk({ chunk, current, count: this.chunkCount }).then((res) => {
+        // remove the task from the active tasks list when it's done
+        activeTasks.splice(activeTasks.indexOf(task), 1);
+        return res;
+      });
 
       activeTasks.push(task);
 
       // 控制并行任务数量
       if (activeTasks.length >= concurrency) {
         const completedTask = await Promise.race(activeTasks); // 等待一个任务完成
-        results.push(completedTask.result); // 等待一个任务完成
-        activeTasks = activeTasks.filter((t) => t !== completedTask.task); // 移除完成的任务
+        results.push(completedTask); // 等待一个任务完成
       }
     }
 
     // 处理剩余未完成的任务
-    results.push(...(await Promise.all(activeTasks)).map((t) => t.result));
+    results.push(...(await Promise.all(activeTasks)));
 
     return results;
   }
