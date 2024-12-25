@@ -30,7 +30,7 @@ class FileChunk {
     return {
       file,
       ...options,
-      chunkCount: this.chunkCount,
+      chunkCount: this.chunkCount
     };
   }
 
@@ -79,7 +79,8 @@ class FileChunk {
 
       // 控制并行任务数量
       if (activeTasks.length >= concurrency) {
-        results.push(await Promise.race(activeTasks)); // 等待一个任务完成
+        const completedTask = await Promise.race(activeTasks); // 等待一个任务完成
+        results.push(completedTask); // 等待一个任务完成
         activeTasks = activeTasks.filter((t) => t !== task); // 移除完成的任务
       }
     }
