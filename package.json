@@ -1,5 +1,5 @@
 {
-  "name": "file-chunker",
+  "name": "@jswork/file-chunker",
   "version": "1.0.0",
   "description": "Efficiently chunk files and process them in parallel streams.",
   "type": "module",

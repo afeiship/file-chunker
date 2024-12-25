@@ -21,7 +21,7 @@ class FileChunker {
     this.options = { ...defaultOptions, ...inOptions };
   }
 
-  createIterator(): Iterator<Blob> {
+  createIterator(): IterableIterator<Blob> {
     const { file, options: { chunkSize } } = this;
     let currentIndex = 0;
 
@@ -29,7 +29,7 @@ class FileChunker {
       [Symbol.iterator]() {
         return this;
       },
-      next() {
+      next(): IteratorResult<Blob> {
         if (currentIndex < file.size) {
           const chunk = file.slice(currentIndex, currentIndex + chunkSize);
           currentIndex += chunkSize;
