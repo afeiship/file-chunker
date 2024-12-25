@@ -4,7 +4,6 @@
   },
   "hooks": {
     "before:init": ["yarn run test"],
-    "after:init": ["t2k"],
     "after:bump": ["yarn run build"],
     "after:release": ["yarn pkg get name | cnpm sync"]
   },

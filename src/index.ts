@@ -8,6 +8,8 @@ const defaultOptions: Partial<IFileChunkerOptions> = {
   concurrency: 10,
 };
 
+// @ref: https://chatgpt.com/c/676ace72-732c-8013-9342-48797a30f123
+
 class FileChunker {
   public file: Blob;
   public options: IFileChunkerOptions;
