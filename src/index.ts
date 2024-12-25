@@ -3,9 +3,15 @@ export interface IFileChunkerOptions {
   concurrency: number;
 }
 
+export interface IFileChunk {
+  chunk: Blob;
+  index: number;
+  total: number;
+}
+
 const defaultOptions: Partial<IFileChunkerOptions> = {
   chunkSize: 1024 * 1024, // 1MB
-  concurrency: 10,
+  concurrency: 10
 };
 
 // @ref: https://chatgpt.com/c/676ace72-732c-8013-9342-48797a30f123
@@ -13,7 +19,6 @@ const defaultOptions: Partial<IFileChunkerOptions> = {
 class FileChunker {
   public file: Blob;
   public options: IFileChunkerOptions;
-
 
   get chunkCount(): number {
     const { chunkSize } = this.options;
@@ -26,7 +31,10 @@ class FileChunker {
   }
 
   createIterator(): IterableIterator<Blob> {
-    const { file, options: { chunkSize } } = this;
+    const {
+      file,
+      options: { chunkSize }
+    } = this;
     let currentIndex = 0;
 
     return {
@@ -45,7 +53,7 @@ class FileChunker {
     };
   }
 
-  async processFileChunks(processChunk: (chunk: Blob) => Promise<any>): Promise<any[]> {
+  async processFileChunks(processChunk: (fileChunk: IFileChunk) => Promise<any>): Promise<any[]> {
     const { concurrency } = this.options;
     const chunkIterator = this.createIterator();
     // 将所有分片存储到数组中
@@ -55,23 +63,22 @@ class FileChunker {
     const results: any[] = [];
     let activeTasks: Promise<any>[] = [];
 
-    for (const chunk of chunks) {
-      const task = processChunk(chunk); // 假设 processChunk 是异步的处理函数
+    for (const [index, chunk] of chunks.entries()) {
+      const task = processChunk({ chunk, index, total: this.chunkCount }); // 假设 processChunk 是异步的处理函数
       activeTasks.push(task);
 
       // 控制并行任务数量
       if (activeTasks.length >= concurrency) {
         results.push(await Promise.race(activeTasks)); // 等待一个任务完成
-        activeTasks = activeTasks.filter(t => t !== task); // 移除完成的任务
+        activeTasks = activeTasks.filter((t) => t !== task); // 移除完成的任务
       }
     }
 
     // 处理剩余未完成的任务
     results.push(...(await Promise.all(activeTasks)));
 
-    return results
+    return results;
   }
 }
-
 
 export default FileChunker;

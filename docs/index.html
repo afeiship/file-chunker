@@ -8,8 +8,33 @@
   <title>Demo</title>
 </head>
 <body>
-<script>
-  console.log('Hello, World!');
+<h1>Demo</h1>
+<input type="file" id="file">
+<script type="module">
+  import FileChunker from 'https://unpkg.com/@jswork/file-chunker@1.0.1/dist/index.esm.js';
+
+  const ipt1 = document.getElementById('file');
+  ipt1.addEventListener('change', function(e) {
+    const files = e.target.files;
+    if (files.length) {
+      const file = files[0];
+      const chunker = new FileChunker(file, {
+        chunkSize: 1024 * 1024,
+        concurrency: 3
+      });
+      console.log(chunker.chunkCount);
+      chunker.processFileChunks((chunk) => {
+        console.log('chunk:', chunk);
+        return fetch('https://httpbin.org/post', {
+          method: 'POST',
+          body: chunk,
+          headers: {
+            'Content-Type': 'application/octet-stream'
+          }
+        });
+      });
+    }
+  });
 </script>
 </body>
 </html>
