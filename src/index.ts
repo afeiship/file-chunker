@@ -15,6 +15,8 @@ const defaultOptions: Partial<IFileChunkOptions> = {
 };
 
 // @ref: https://chatgpt.com/c/676ace72-732c-8013-9342-48797a30f123
+// https://github.com/rxaviers/async-pool
+// https://stackoverflow.com/questions/42896456/get-which-promise-completed-in-promise-race
 
 class FileChunk {
   public file: File;
