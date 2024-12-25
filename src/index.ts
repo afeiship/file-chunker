@@ -28,11 +28,9 @@ class FileChunk {
   get meta() {
     const { file, options } = this;
     return {
-      name: file.name,
-      size: file.size,
-      chunkSize: options.chunkSize,
+      file,
+      ...options,
       chunkCount: this.chunkCount,
-      concurrency: options.concurrency
     };
   }
 
