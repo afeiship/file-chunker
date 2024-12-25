@@ -76,9 +76,11 @@ class FileChunk {
 
     for (const [index, chunk] of chunks.entries()) {
       const current = index + 1;
+      console.log('chunk current:', current);
       const task = processChunk({ chunk, current, count: this.chunkCount }).then((res) => {
         // remove the task from the active tasks list when it's done
         activeTasks.splice(activeTasks.indexOf(task), 1);
+        results[index] = res;
         return res;
       });
 
@@ -86,13 +88,13 @@ class FileChunk {
 
       // 控制并行任务数量
       if (activeTasks.length >= concurrency) {
-        const completedTask = await Promise.race(activeTasks); // 等待一个任务完成
-        results.push(completedTask); // 等待一个任务完成
+        await Promise.race(activeTasks); // 等待一个任务完成
       }
     }
 
     // 处理剩余未完成的任务
-    results.push(...(await Promise.all(activeTasks)));
+    await Promise.all(activeTasks);
+    // results.push(...(await Promise.all(activeTasks)));
 
     return results;
   }
