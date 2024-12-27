@@ -1,6 +1,7 @@
 export interface IFileChunkOptions {
   chunkSize: number;
-  concurrency: number;
+  concurrency?: number;
+  maxRetries?: number;
 }
 
 export interface IFileChunk {
@@ -9,9 +10,10 @@ export interface IFileChunk {
   count: number;
 }
 
-const defaultOptions: Partial<IFileChunkOptions> = {
+const defaultOptions: Required<IFileChunkOptions> = {
   chunkSize: 1024 * 1024, // 1MB
-  concurrency: 10
+  concurrency: 10,
+  maxRetries: 3
 };
 
 // @ref: https://chatgpt.com/c/676ace72-732c-8013-9342-48797a30f123
@@ -38,7 +40,7 @@ class FileChunk {
 
   constructor(inFile: File, inOptions: IFileChunkOptions) {
     this.file = inFile;
-    this.options = { ...defaultOptions, ...inOptions };
+    this.options = { ...defaultOptions, ...inOptions } as Required<IFileChunkOptions>;
   }
 
   createIterator(): IterableIterator<Blob> {
@@ -81,12 +83,12 @@ class FileChunk {
         activeTasks.splice(activeTasks.indexOf(task), 1);
         results[index] = res;
         return res;
-      });
+      })
 
       activeTasks.push(task);
 
       // 控制并行任务数量
-      if (activeTasks.length >= concurrency) {
+      if (activeTasks.length >= concurrency!) {
         await Promise.race(activeTasks); // 等待一个任务完成
       }
     }
