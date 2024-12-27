@@ -1,6 +1,6 @@
 {
   "name": "@jswork/file-chunker",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Efficiently chunk files and process them in parallel streams.",
   "type": "module",
   "main": "dist/index.cjs.js",
