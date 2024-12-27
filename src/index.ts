@@ -67,7 +67,7 @@ class FileChunk {
   }
 
   async processChunks(processChunk: (fileChunk: IFileChunk) => Promise<any>): Promise<any[]> {
-    const { concurrency } = this.options;
+    const { concurrency, maxRetries } = this.options;
     const chunkIterator = this.createIterator();
     // 将所有分片存储到数组中
     const chunks = [...chunkIterator];
@@ -75,6 +75,7 @@ class FileChunk {
     // 创建一个队列并行处理分片
     const results: Promise<any>[] = [];
     const activeTasks: Promise<any>[] = [];
+    let attemtCount = 0;
 
     for (const [index, chunk] of chunks.entries()) {
       const current = index + 1;
@@ -83,7 +84,15 @@ class FileChunk {
         activeTasks.splice(activeTasks.indexOf(task), 1);
         results[index] = res;
         return res;
-      })
+      }).catch((err) => {
+        // retry the task, up to maxRetries
+        if (attemtCount < maxRetries!) {
+          attemtCount++;
+          return this.processChunks(processChunk);
+        } else {
+          throw err;
+        }
+      });
 
       activeTasks.push(task);
 
