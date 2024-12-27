@@ -42,6 +42,7 @@ class FileChunk {
     return {
       file,
       options,
+      chuckSize: this.chunkSize,
       chunkCount: this.chunkCount
     };
   }
