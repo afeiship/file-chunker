@@ -33,7 +33,7 @@ class FileChunk {
     const { file, options } = this;
     return {
       file,
-      ...options,
+      options,
       chunkCount: this.chunkCount
     };
   }
@@ -69,30 +69,27 @@ class FileChunk {
   async processChunks(processChunk: (fileChunk: IFileChunk) => Promise<any>): Promise<any[]> {
     const { concurrency, maxRetries } = this.options;
     const chunkIterator = this.createIterator();
-    // 将所有分片存储到数组中
     const chunks = [...chunkIterator];
 
     // 创建一个队列并行处理分片
     const results: Promise<any>[] = [];
     const activeTasks: Promise<any>[] = [];
-    let attemtCount = 0;
+    let attempts = 0;
 
     for (const [index, chunk] of chunks.entries()) {
       const current = index + 1;
-      const task = processChunk({ chunk, current, count: this.chunkCount }).then((res) => {
-        // remove the task from the active tasks list when it's done
-        activeTasks.splice(activeTasks.indexOf(task), 1);
-        results[index] = res;
-        return res;
-      }).catch((err) => {
-        // retry the task, up to maxRetries
-        if (attemtCount < maxRetries!) {
-          attemtCount++;
+      const task = processChunk({ chunk, current, count: this.chunkCount })
+        .then((res) => {
+          // remove the task from the active tasks list when it's done
+          activeTasks.splice(activeTasks.indexOf(task), 1);
+          results[index] = res;
+          return res;
+        })
+        .catch((err) => {
+          // retry the task, up to maxRetries
+          if (attempts++ >= maxRetries!) throw err;
           return this.processChunks(processChunk);
-        } else {
-          throw err;
-        }
-      });
+        });
 
       activeTasks.push(task);
 
@@ -104,7 +101,6 @@ class FileChunk {
 
     // 处理剩余未完成的任务
     await Promise.all(activeTasks);
-    // results.push(...(await Promise.all(activeTasks)));
 
     return results;
   }
