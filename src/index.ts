@@ -13,7 +13,7 @@ export interface IFileChunk {
 }
 
 const defaultOptions: Required<IFileChunkOptions> = {
-  chunkSize: 1024 * 1024, // 1MB
+  chunkSize: 1024 * 1024 * 5, // 5MB, Amazon minimum limit is 5MB
   concurrency: 10,
   maxRetries: 3
 };
