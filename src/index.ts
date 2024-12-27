@@ -1,6 +1,7 @@
+export type ChunkSize = number | ((file: File) => number);
+
 export interface IFileChunkOptions {
-  chunkSize: number;
-  chunkSizeCallback?: (file: File) => number;
+  chunkSize: ChunkSize;
   concurrency?: number;
   maxRetries?: number;
 }
@@ -13,7 +14,6 @@ export interface IFileChunk {
 
 const defaultOptions: Required<IFileChunkOptions> = {
   chunkSize: 1024 * 1024, // 1MB
-  chunkSizeCallback: () => defaultOptions.chunkSize,
   concurrency: 10,
   maxRetries: 3
 };
@@ -27,14 +27,14 @@ class FileChunk {
   public options: IFileChunkOptions;
 
   get chunkCount(): number {
-    const { chunkSize } = this.options;
-    return Math.ceil(this.file.size / chunkSize);
+    return Math.ceil(this.file.size / this.chunkSize);
   }
 
   get chunkSize(): number {
-    const { chunkSizeCallback, chunkSize } = this.options;
-    if (chunkSize) return chunkSize;
-    return chunkSizeCallback?.(this.file) || defaultOptions.chunkSize;
+    const { chunkSize } = this.options;
+    if (typeof chunkSize === 'number') return chunkSize;
+    if (typeof chunkSize === 'function') return chunkSize(this.file);
+    throw new Error('Invalid chunkSize option');
   }
 
   get meta() {
