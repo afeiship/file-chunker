@@ -1,5 +1,6 @@
 export interface IFileChunkOptions {
   chunkSize: number;
+  chunkSizeCallback?: (file: File) => number;
   concurrency?: number;
   maxRetries?: number;
 }
@@ -12,6 +13,7 @@ export interface IFileChunk {
 
 const defaultOptions: Required<IFileChunkOptions> = {
   chunkSize: 1024 * 1024, // 1MB
+  chunkSizeCallback: () => defaultOptions.chunkSize,
   concurrency: 10,
   maxRetries: 3
 };
@@ -29,6 +31,12 @@ class FileChunk {
     return Math.ceil(this.file.size / chunkSize);
   }
 
+  get chunkSize(): number {
+    const { chunkSizeCallback, chunkSize } = this.options;
+    if (chunkSize) return chunkSize;
+    return chunkSizeCallback?.(this.file) || defaultOptions.chunkSize;
+  }
+
   get meta() {
     const { file, options } = this;
     return {
@@ -44,10 +52,8 @@ class FileChunk {
   }
 
   createIterator(): IterableIterator<Blob> {
-    const {
-      file,
-      options: { chunkSize }
-    } = this;
+    const { file } = this;
+    const chunkSize = this.chunkSize;
     let currentIndex = 0;
 
     return {
